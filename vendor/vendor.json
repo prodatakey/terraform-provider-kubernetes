@@ -1657,6 +1657,18 @@
 			"revisionTime": "2017-04-07T17:21:22Z"
 		},
 		{
+			"checksumSHA1": "sjJLdgtv19treHWqVT7oDDCDJ0A=",
+			"path": "k8s.io/api/apps/v1",
+			"revision": "2694da5be9c4ab4f3fd826112d4c3f71b8bf4b23",
+			"revisionTime": "2018-02-11T06:12:45Z"
+		},
+		{
+			"checksumSHA1": "G7TFzN3WjQkWsn+pJl/kFBSny1A=",
+			"path": "k8s.io/api/core/v1",
+			"revision": "2694da5be9c4ab4f3fd826112d4c3f71b8bf4b23",
+			"revisionTime": "2018-02-11T06:12:45Z"
+		},
+		{
 			"checksumSHA1": "tyJ8yrI3lC+JdiVumOFFugx0264=",
 			"path": "k8s.io/apimachinery/pkg/api/equality",
 			"revision": "1fd2e63a9a370677308a42f24fd40c86438afddf",

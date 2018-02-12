@@ -377,7 +377,7 @@ func TestAccKubernetesDeployment_with_empty_dir_volume(t *testing.T) {
 					testAccCheckKubernetesDeploymentExists("kubernetes_deployment.test", &conf),
 					resource.TestCheckResourceAttr("kubernetes_deployment.test", "spec.0.template.0.container.0.image", imageName),
 					resource.TestCheckResourceAttr("kubernetes_deployment.test", "spec.0.template.0.container.0.volume_mount.#", "1"),
-					resource.TestCheckResourceAttr("kubernetes_deployment.test", "spec.0.template.0.container.0.volume_mount.0.mount_path", "/cache"),
+					resource.TestCheckResourceAttr("kubernetes_deployment.test", "spec.0.template.0.container.0.volume_mount.0.mount_path", "/cach"),
 					resource.TestCheckResourceAttr("kubernetes_deployment.test", "spec.0.template.0.container.0.volume_mount.0.name", "cache-volume"),
 					resource.TestCheckResourceAttr("kubernetes_deployment.test", "spec.0.template.0.volume.0.empty_dir.0.medium", "Memory"),
 				),
@@ -454,9 +454,11 @@ resource "kubernetes_deployment" "test" {
   spec {
     replicas = 1000 # This is intentionally high to exercise the waiter
     selector {
-      TestLabelOne = "one"
-      TestLabelTwo = "two"
-      TestLabelThree = "three"
+      match_labels {
+        TestLabelOne = "one"
+        TestLabelTwo = "two"
+        TestLabelThree = "three"
+	  }
     }
     template {
       container {

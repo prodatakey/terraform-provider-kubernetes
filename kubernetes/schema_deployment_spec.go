@@ -56,12 +56,16 @@ func deploymentSpecFields() map[string]*schema.Schema {
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								"max_surge": {
+									Type:        schema.TypeString,
 									Description: "The maximum number of pods that can be scheduled above the desired number of pods. Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%). This can not be 0 if max_unavailable is 0. Absolute number is calculated from percentage by rounding up. Defaults to 25%",
 									Default:     "25%",
+									Optional:    true,
 								},
 								"max_unavailable": {
+									Type:        schema.TypeString,
 									Description: "The maximum number of pods that can be unavailable during the update. Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%). Absolute number is calculated from percentage by rounding down. This can not be 0 if max_surge is 0. Defaults to 25%.",
 									Default:     "25%",
+									Optional:    true,
 								},
 							},
 						},

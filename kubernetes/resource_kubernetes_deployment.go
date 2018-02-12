@@ -11,7 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	pkgApi "k8s.io/apimachinery/pkg/types"
 	kubernetes "k8s.io/client-go/kubernetes"
-	api "k8s.io/client-go/pkg/api/v1"
+	api "k8s.io/client-go/pkg/apis/apps/v1beta1"
 )
 
 func resourceKubernetesDeployment() *schema.Resource {
@@ -47,30 +47,35 @@ func resourceKubernetesDeployment() *schema.Resource {
 }
 
 func resourceKubernetesDeploymentCreate(d *schema.ResourceData, meta interface{}) error {
+	// Get the k8s control connection
 	conn := meta.(*kubernetes.Clientset)
 
+	// Convert tf values to k8s API types
 	metadata := expandMetadata(d.Get("metadata").([]interface{}))
-	spec, err := expandReplicationControllerSpec(d.Get("spec").([]interface{}))
+	spec, err := expandDeploymentSpec(d.Get("spec").([]interface{}))
 	if err != nil {
 		return err
 	}
 
+	// TODO: Investigate necessity, looks like it's blanking this value on all creations
 	spec.Template.Spec.AutomountServiceAccountToken = ptrToBool(false)
 
-	rc := api.ReplicationController{
-		ObjectMeta: metadata,
-		Spec:       spec,
+	// Create an instance of the root k8s deployment API object
+	dep := api.Deployment{
+		Metadata: metadata,
+		Spec:     spec,
 	}
 
-	log.Printf("[INFO] Creating new replication controller: %#v", rc)
-	out, err := conn.CoreV1().ReplicationControllers(metadata.Namespace).Create(&rc)
+	// Send a request to the k8s API `create` operation for the deployment resource
+	log.Printf("[INFO] Creating new deployment: %#v", dep)
+	out, err := conn.AppsV1beta1().Deployments(metadata.Namespace).Create(&dep)
 	if err != nil {
-		return fmt.Errorf("Failed to create replication controller: %s", err)
+		return fmt.Errorf("Failed to create deployment: %s", err)
 	}
 
-	d.SetId(buildId(out.ObjectMeta))
+	d.SetId(buildId(out.Metadata))
 
-	log.Printf("[DEBUG] Waiting for replication controller %s to schedule %d replicas",
+	log.Printf("[DEBUG] Waiting for deployment %s to schedule %d replicas",
 		d.Id(), *out.Spec.Replicas)
 	// 10 mins should be sufficient for scheduling ~10k replicas
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate),
@@ -78,13 +83,16 @@ func resourceKubernetesDeploymentCreate(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return err
 	}
+	// TODO: Use deployment info to figure out if it's nominal
+	// The aggregate data referred to in the below commentary may be served by the deployment
+
 	// We could wait for all pods to actually reach Ready state
 	// but that means checking each pod status separately (which can be expensive at scale)
 	// as there's no aggregate data available from the API
 
-	log.Printf("[INFO] Submitted new replication controller: %#v", out)
+	log.Printf("[INFO] Submitted new deployment: %#v", out)
 
-	return resourceKubernetesReplicationControllerRead(d, meta)
+	return resourceKubernetesDeploymentRead(d, meta)
 }
 
 func resourceKubernetesDeploymentRead(d *schema.ResourceData, meta interface{}) error {

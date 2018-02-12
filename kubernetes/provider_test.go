@@ -154,9 +154,7 @@ func testAccPreCheck(t *testing.T) {
 	hasFileCfg := (os.Getenv("KUBE_CTX_AUTH_INFO") != "" && os.Getenv("KUBE_CTX_CLUSTER") != "")
 	hasStaticCfg := (os.Getenv("KUBE_HOST") != "" &&
 		os.Getenv("KUBE_USER") != "" &&
-		os.Getenv("KUBE_PASSWORD") != "" &&
-		os.Getenv("KUBE_CLIENT_CERT_DATA") != "" &&
-		os.Getenv("KUBE_CLIENT_KEY_DATA") != "" &&
+		(os.Getenv("KUBE_PASSWORD") != "" || (os.Getenv("KUBE_CLIENT_CERT_DATA") != "" && os.Getenv("KUBE_CLIENT_KEY_DATA") != "")) &&
 		os.Getenv("KUBE_CLUSTER_CA_CERT_DATA") != "")
 
 	if !hasFileCfg && !hasStaticCfg {
